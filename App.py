@@ -1,12 +1,15 @@
 from langchain_core.messages import AIMessage, HumanMessage
 import streamlit as st
 import requests
+import json
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [
-        AIMessage(content="Hello! I'm a SQL assistant. Ask me anything about your database.")
-    ]
+def session_starter():
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = [
+            AIMessage(content="Hello! I'm a SQL assistant. Ask me anything about your database.")
+        ]
 
+session_starter()
 # Nama web pada tab
 st.set_page_config(page_title='Chat with MySQL', page_icon=':left_speech_bubble:', layout='wide')
 
@@ -22,11 +25,16 @@ with st.sidebar:
     st.text_input("User", key="User", value="root")
     st.text_input("Password", type="password", key="Password", value="Qwerty123456#")
     st.text_input("Database", key="Database", value="chinook")
-    #
-    if st.button("Connect"):
-        with st.spinner("Connecting to the database..."):
-            # send data database ke backend
-            st.success("Connected to database!")
+
+    st.write("")
+    st.write("")
+    st.write("")
+    st.subheader("Change Database and Clear Chat History")
+    st.write("Change the database and clear the chat history by click-ing the Reset button")
+    if st.button("Reset"):
+        with st.spinner("Cleaning chat history...."):
+            del st.session_state["chat_history"]
+            session_starter()
 
 for message in st.session_state.chat_history:
     if isinstance(message, AIMessage):
@@ -44,7 +52,16 @@ if user_query is not None and user_query.strip() != "":
         st.markdown(user_query)
 
     with st.chat_message("AI"):
-        response = requests.post("http://localhost:5000/query", json={'question': user_query})
+        response_json = requests.post("http://localhost:5000/query",
+                                           json={'question': user_query,
+                                                 'host': st.session_state["User"],
+                                                 'port': st.session_state["Port"],
+                                                 'user': st.session_state["Host"],
+                                                 'password': st.session_state["Password"],
+                                                 'database': st.session_state["Database"]
+                                                 }
+                                 )
+        response = json.loads(response_json)
         st.markdown(response)
 
     st.session_state.chat_history.append(AIMessage(content=response))
@@ -62,3 +79,4 @@ if user_query is not None and user_query.strip() != "":
 
 #kirim data database
 #nerima response
+#tambah tombol reset
