@@ -51,20 +51,21 @@ if user_query is not None and user_query.strip() != "":
     with st.chat_message("Human"):
         st.markdown(user_query)
 
-    response_json = requests.post("http://localhost:8000/query",
+    response = requests.post("http://localhost:5000/query",
                                   json={'question': user_query,
-                                        'user': st.session_state["Host"],
+                                        'user': st.session_state["User"],
                                         'password': st.session_state["Password"],
-                                        'host': st.session_state["User"],
+                                        'host': st.session_state["Host"],
                                         'database': st.session_state["Database"],
                                         'port': st.session_state["Port"],
                                         }
                                   )
     with st.chat_message("AI"):
-        response = json.loads(response_json)
-        st.markdown(response["jawaban"])
+        response_json = response.json()
+        st.markdown(response_json['jawaban'])
 
-    st.session_state.chat_history.append(AIMessage(content=response["jawaban"]))
+
+    st.session_state.chat_history.append(AIMessage(content=response_json['jawaban']))
 
 #tambah fitur
 #login dengan google atau rds (secret.tombol
