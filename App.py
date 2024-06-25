@@ -51,16 +51,16 @@ if user_query is not None and user_query.strip() != "":
     with st.chat_message("Human"):
         st.markdown(user_query)
 
+    response_json = requests.post("http://localhost:8000/query",
+                                  json={'question': user_query,
+                                        'user': st.session_state["Host"],
+                                        'password': st.session_state["Password"],
+                                        'host': st.session_state["User"],
+                                        'database': st.session_state["Database"],
+                                        'port': st.session_state["Port"],
+                                        }
+                                  )
     with st.chat_message("AI"):
-        response_json = requests.post("http://localhost:5000/query",
-                                           json={'question': user_query,
-                                                 'host': st.session_state["User"],
-                                                 'port': st.session_state["Port"],
-                                                 'user': st.session_state["Host"],
-                                                 'password': st.session_state["Password"],
-                                                 'database': st.session_state["Database"]
-                                                 }
-                                 )
         response = json.loads(response_json)
         st.markdown(response["jawaban"])
 
