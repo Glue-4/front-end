@@ -62,9 +62,9 @@ if user_query is not None and user_query.strip() != "":
                                                  }
                                  )
         response = json.loads(response_json)
-        st.markdown(response)
+        st.markdown(response["jawaban"])
 
-    st.session_state.chat_history.append(AIMessage(content=response))
+    st.session_state.chat_history.append(AIMessage(content=response["jawaban"]))
 
 #tambah fitur
 #login dengan google atau rds (secret.tombol
