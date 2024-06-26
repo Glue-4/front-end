@@ -1,7 +1,6 @@
 from langchain_core.messages import AIMessage, HumanMessage
 import streamlit as st
 import requests
-import json
 
 def session_starter():
     if "chat_history" not in st.session_state:
@@ -61,11 +60,29 @@ if user_query is not None and user_query.strip() != "":
                                         }
                                   )
     with st.chat_message("AI"):
-        response_json = response.json()
-        st.markdown(response_json['jawaban'])
+        try:
+            response_json = response.json()
+            jawaban = response_json.get("jawaban")
+            error = response_json.get("error")
 
-
-    st.session_state.chat_history.append(AIMessage(content=response_json['jawaban']))
+            if jawaban:
+                st.markdown(jawaban)
+                st.session_state.chat_history.append(AIMessage(content=jawaban))
+            elif error:
+                st.markdown(f"Error from server: {error}")
+                st.session_state.chat_history.append(AIMessage(content=f"Error from server: {error}"))
+            else:
+                st.markdown("Unexpected response format from server")
+                st.session_state.chat_history.append(AIMessage(content="Unexpected response format from server"))
+        except requests.exceptions.RequestException as e:
+            st.markdown(f"Failed to reach server: {e}")
+            st.session_state.chat_history.append(AIMessage(content=f"Failed to reach server: {e}"))
+        except ValueError as e:
+            st.markdown(f"Invalid JSON response: {e}")
+            st.session_state.chat_history.append(AIMessage(content=f"Invalid JSON response: {e}"))
+        except Exception as e:
+            st.markdown(f"An unexpected error occurred: {e}")
+            st.session_state.chat_history.append(AIMessage(content=f"An unexpected error occurred: {e}"))
 
 #tambah fitur
 #login dengan google atau rds (secret.tombol
